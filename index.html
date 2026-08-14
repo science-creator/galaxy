@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우리은하 실험실</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div class="top">
+  <h1>🌌 우리은하 실험실</h1>
+  <span class="badge">중학교 3학년 과학 · 별과 우주</span>
+  <span class="spacer"></span>
+  <a class="home" href="worksheet.html" target="ga-worksheet" data-win>📝 학습지 ↗</a>
+  <a class="home" href="teacher.html">선생님용 ▸</a>
+</div>
+
+<div class="wrap">
+
+  <div class="scenes" id="scenes">
+    <button type="button" class="scene-btn on" data-scene="shape"><span class="em">🌌</span> 우리은하의 모양</button>
+    <button type="button" class="scene-btn" data-scene="milky"><span class="em">🥛</span> 은하수</button>
+    <button type="button" class="scene-btn" data-scene="cluster"><span class="em">✨</span> 성단과 성운</button>
+    <button type="button" class="scene-btn" data-scene="mission"><span class="em">🏆</span> 미션 도전</button>
+  </div>
+
+  <div class="card hidden" id="missionCard">
+    <h2>🏆 미션 도전 <span class="step">깬 미션 <span id="missionScore">0 / 6</span></span></h2>
+    <p class="lead">먼저 <b>예측</b>하고, 실제로 <b>확인</b>하세요. 성공하면 이유가 열립니다.</p>
+    <div class="mission-list" id="missionList"></div>
+    <div class="mission-body hidden" id="missionBody">
+      <h3 id="mTitle"></h3>
+      <p id="mStory"></p>
+      <div class="predict hidden" id="mPredict">
+        <div class="q" id="mQ"></div>
+        <div class="opts" id="mOpts"></div>
+      </div>
+      <div class="predict hidden" id="mGoals"></div>
+      <div class="verdict hidden" id="mVerdict"></div>
+    </div>
+  </div>
+
+  <div class="stage-wrap">
+
+    <div>
+      <div class="playbar">
+        <button type="button" class="btn" id="btnReset">↺ 처음으로</button>
+        <button type="button" class="btn" id="btnRecord">📋 지금 값 기록</button>
+      </div>
+
+      <div class="stage">
+        <canvas id="stage"></canvas>
+        <div class="stage-tip" id="tip"></div>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <h2>📋 실험 기록 <span class="step">학습지에 옮겨 적기</span></h2>
+        <p class="lead">궁금한 값이 나오면 <b>📋 지금 값 기록</b>을 누르세요.</p>
+        <div class="tablescroll">
+          <table class="grid">
+            <thead>
+              <tr><th>번호</th><th>장면</th><th>대상</th><th>값 ①</th><th>값 ②</th></tr>
+            </thead>
+            <tbody id="recBody"></tbody>
+          </table>
+        </div>
+        <p id="recEmpty" class="hint">아직 기록이 없습니다.</p>
+        <div class="btnrow"><button type="button" class="btn" id="btnClearRec">기록 지우기</button></div>
+      </div>
+
+      <div class="card">
+        <h2>🔎 무엇을 보고 있는 걸까?</h2>
+        <div class="hint">
+          <b>은하</b> — 수천억 개의 별들이 모여 있는 거대한 집단.<br>
+          <b>우리은하</b> — 우리 <b>태양계가 포함된</b> 은하. 약 <b>2000억</b> 개의 별이 모여 있고,
+          모양으로 나누면 <b>막대나선은하</b>다. 지름은 약 <b>30000 pc</b>,
+          태양계는 중심에서 약 <b>8500 pc</b> 떨어져 있다.<br>
+          <b>은하수</b> — 밤하늘을 가로지르는 희미한 빛의 띠. 지구에서 본 <b>우리은하의 옆모습</b>이다.
+        </div>
+        <div class="warnbox">
+          <b>이 앱의 결론은 하나입니다 — 우리가 원반 <u>안에</u> 있다.</b><br>
+          그래서 원반을 따라 보면 별이 겹겹이 겹쳐 <b>밝은 띠</b>가 되고,
+          원반 위아래로 보면 금방 벗어나 <b>어둡습니다.</b> 은하수가 <b>띠</b>인 이유예요.<br>
+          같은 이유로 <b>중심 쪽이 더 밝고 두껍고</b>, 밤하늘이 중심을 향하는 <b>여름</b>에 잘 보입니다.
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h3 id="gaugeTitle">🌌 우리은하</h3>
+        <p class="sub" id="gaugeSub">크기와 태양계의 자리</p>
+        <div class="bars">
+          <div class="bar-row total">
+            <div class="bar-name"><span class="dot" style="background:#a78bfa"></span><span id="barName1">값</span></div>
+            <div class="bar-track" id="barA">
+              <div class="bar-fill" style="background:linear-gradient(90deg,#ddd6fe,#7c3aed)"></div>
+              <div class="bar-val">0</div>
+            </div>
+          </div>
+          <div class="bar-row" id="rowB">
+            <div class="bar-name"><span class="dot" style="background:#fbbf24"></span><span id="barName2">비교</span></div>
+            <div class="bar-track" id="barB">
+              <div class="bar-fill" style="background:linear-gradient(90deg,#fde68a,#f59e0b)"></div>
+              <div class="bar-val">0</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="readouts">
+          <div class="ro"><b id="roName1">지름</b><span id="roVal1">-</span><i id="roUnit1"></i></div>
+          <div class="ro"><b id="roName2">태양계</b><span id="roVal2">-</span><i id="roUnit2"></i></div>
+          <div class="ro"><b id="roName3">별 수</b><span id="roVal3">-</span><i id="roUnit3"></i></div>
+          <div class="ro"><b id="roName4">종류</b><span id="roVal4">-</span><i id="roUnit4"></i></div>
+        </div>
+
+        <div class="formula">
+          <div id="fLaw"></div>
+          <div id="fWhy"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3 id="graphTitle">📈 방향에 따른 은하수의 밝기</h3>
+        <p class="sub" id="graphSub">중심 쪽이 가장 밝다</p>
+        <canvas class="graph" id="graph"></canvas>
+      </div>
+
+      <div class="panel">
+        <h3>🎛️ 조작</h3>
+
+        <div class="ctl" data-for="shape mission" data-need="view">
+          <label>어느 쪽에서 볼까? <span></span></label>
+          <div class="chips" id="chipView">
+            <button type="button" class="chip on" data-val="top">⬆️ 위에서</button>
+            <button type="button" class="chip" data-val="side">➡️ 옆에서</button>
+          </div>
+        </div>
+
+        <div class="ctl" data-for="milky mission" data-need="lon">
+          <label>은하 중심에서 벗어난 각 <span id="valLon">0°</span></label>
+          <input type="range" id="rngLon" min="0" max="180" step="5" value="0">
+        </div>
+
+        <div class="ctl" data-for="milky mission" data-need="lat">
+          <label>은하면에서 위아래로 <span id="valLat">0°</span></label>
+          <input type="range" id="rngLat" min="0" max="60" step="1" value="0">
+        </div>
+
+        <div class="ctl" data-for="milky mission" data-need="season">
+          <label>계절 <span></span></label>
+          <div class="chips" id="chipSeason">
+            <button type="button" class="chip on" data-val="summer">☀️ 여름</button>
+            <button type="button" class="chip" data-val="winter">❄️ 겨울</button>
+          </div>
+        </div>
+
+        <div class="ctl" data-for="cluster mission" data-need="obj">
+          <label>무엇을 볼까? <span></span></label>
+          <div class="chips" id="chipObj">
+            <button type="button" class="chip on" data-val="cluster">✨ 성단</button>
+            <button type="button" class="chip" data-val="nebula">🌈 성운</button>
+          </div>
+        </div>
+
+        <div class="hint" style="font-size:16px;margin-top:16px">
+          <b>1 pc = 약 3.26 광년</b> · 우리은하 지름 30000 pc ≒ 약 <b>10만 광년</b>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /stage-wrap -->
+
+  <div class="card">
+    <h2>📚 이 실험은 무엇과 이어질까</h2>
+    <div class="tablescroll">
+      <table class="grid">
+        <tr><th>성취기준</th><th>내용</th><th>여기서 하는 일</th></tr>
+        <tr><td>[9과23-02]</td>
+            <td class="left">우리은하의 모양, 크기, 구성 천체를 설명할 수 있다</td>
+            <td class="left">🌌 우리은하의 모양 · 🥛 은하수 · ✨ 성단과 성운</td></tr>
+        <tr><td>[9과23-01]</td>
+            <td class="left">별의 거리와 밝기 <em>(앞 소단원)</em></td>
+            <td class="left">연주시차 실험실 · 별의 밝기와 등급 실험실</td></tr>
+      </table>
+    </div>
+    <div class="hint">
+      앞 소단원에서 <b>별 하나</b>의 거리와 밝기를 다뤘다면, 여기서는 그 별들이 모인
+      <b>은하 전체</b>를 봅니다. 거리 단위 <b>pc</b>가 그대로 이어집니다.
+    </div>
+  </div>
+
+</div>
+
+<script src="js/pdf.js"></script>
+<script src="js/galaxy.js"></script>
+<script src="js/lab.js"></script>
+</body>
+</html>
