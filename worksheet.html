@@ -61,6 +61,22 @@
 
 <div class="wrap">
 
+  <!-- 🔑 선생님용 정답지 — worksheet.html?key 로 열린다. 평소에는 숨어 있다. -->
+  <div id="keyRoot">
+    <div class="print-only print-head">
+      <h1>우리은하 학습지 · 정답지</h1>
+      <p class="sub">중학교 3학년 과학 · 별과 우주 [9과23-02] — 우리가 살고 있는 은하 · 선생님용</p>
+    </div>
+    <div class="card no-print keybar">
+      <h2>🔑 정답지</h2>
+      <label><input type="checkbox" id="kQ"> 문제도 함께</label>
+      <label><input type="checkbox" id="kWhy"> 해설도 함께</label>
+      <span class="grow"></span>
+      <a class="btn" href="worksheet.html">← 학생용 학습지</a>
+      <button type="button" class="btn primary" id="kPrint">🖨 인쇄하기</button>
+    </div>
+    <div class="card" id="keySheet"></div>
+  </div>
   <div class="print-only print-head">
     <h1>우리은하 학습지</h1>
     <p class="sub">중학교 3학년 과학 · 별과 우주 [9과23-02] — 우리가 살고 있는 은하</p>
@@ -199,7 +215,10 @@
                "은하 원반을 둘러싼 <b>구형의 공간</b>에 많습니다." },
         { type: "tbl", q: "산개 성단과 구상 성단을 비교해 표를 채우세요.",
           head: ["구분", "별의 수", "모양", "색", "있는 곳"],
-          rows: ["산개 성단", "구상 성단"] }
+          rows: ["산개 성단", "구상 성단"],
+          /* js/galaxy.js 의 CLUSTERS 와 같은 내용이다. */
+          keyAns: [["수십 개 ~ 수만 개", "일정한 모양 없이 엉성하게", "푸른색", "나선팔"],
+                   ["수만 개 ~ 수십만 개", "공 모양으로 빽빽하게", "붉은색", "중심부와 그 둘레"]] }
       ]
     },
     {
@@ -548,9 +567,69 @@
     });
   }
 
+  /* ---------------------------------------------------------
+     🔑 정답지 (선생님용) — worksheet.html?key
+     학생용과 **같은 SHEET 를 그대로** 읽는다. 정답을 따로 적어 두지
+     않으므로, 문항을 고치면 정답지도 저절로 따라온다.
+     표(tbl)만은 정답이 자료에 없어 keyAns 를 문항에 함께 적어 둔다.
+     --------------------------------------------------------- */
+  function keyAnswerHtml(c) {
+    var it = c.def;
+    if (it.type === "tbl") {
+      if (typeof it.keyAns === "string") return it.keyAns;
+      if (!it.keyAns) return "<i>실험실에서 읽은 값</i>";
+      return it.keyAns.map(function (row, ri) {
+        return it.rows[ri] + " — " + row.join(" / ");
+      }).join("<br>");
+    }
+    if (it.type === "text") return "<i>서술형</i> · " + stripTags(it.why || "");
+    return c.rightText ? c.rightText() : "—";
+  }
+
+  function buildKey() {
+    document.body.classList.add("keymode");
+    document.title = "우리은하 학습지 정답지";
+    var top = document.querySelector(".top h1");
+    if (top) top.textContent = "🔑 우리은하 학습지 — 정답지";
+
+    var host = document.getElementById("keySheet");
+    var cur = -1, list = null;
+    ctrls.forEach(function (c) {
+      if (c.step !== cur) {
+        cur = c.step;
+        host.appendChild(el("div", "kstep", SHEET[cur].step));
+        list = el("div", "klist");
+        host.appendChild(list);
+      }
+      var row = el("div", "krow");
+      row.appendChild(el("span", "kno", String(c.no)));
+      var body = el("div", "kbody");
+      body.appendChild(el("div", "kq", stripTags(c.def.q)));
+      body.appendChild(el("div", "ka", keyAnswerHtml(c)));
+      /* 서술형은 정답 자리에 이미 해설이 들어가 있어 두 번 쓰지 않는다. */
+      if (c.def.why && c.def.type !== "text") {
+        body.appendChild(el("div", "kwhy", stripTags(c.def.why)));
+      }
+      row.appendChild(body);
+      list.appendChild(row);
+    });
+
+    function toggle(id, cls) {
+      var box = document.getElementById(id);
+      box.addEventListener("change", function () {
+        document.body.classList.toggle(cls, box.checked);
+      });
+    }
+    toggle("kQ", "showq");
+    toggle("kWhy", "showwhy");
+    document.getElementById("kPrint").addEventListener("click", function () { window.print(); });
+  }
   build(); bind(); applyLockState();
 
+  if (/(^|[?&])key(=|&|$)/.test(location.search)) buildKey();
+
   window.GASheet = {
+    buildKey: buildKey, keyAnswerHtml: keyAnswerHtml,
     ctrls: ctrls, score: score, makePdf: makePdf, SHEET: SHEET,
     isSubmitted: function () { return submitted; },
     forceSubmit: function (info) {
