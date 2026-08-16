@@ -215,8 +215,10 @@
       g.fillStyle = COL.faint;
       g.fillText("나선팔", cx + R * 0.72, cy + R * 0.62);
 
-      /* 태양계 */
-      var sx = cx + sunR * 0.72, sy = cy + sunR * 0.66;
+      /* 태양계 — 중심에서 **정확히 sunR** 떨어진 곳에 둔다.
+         (예전에는 0.72·0.66 을 곱해 실제보다 2% 가까이 그려졌다) */
+      var sunAng = Math.atan2(0.66, 0.72);
+      var sx = cx + Math.cos(sunAng) * sunR, sy = cy + Math.sin(sunAng) * sunR;
       g.strokeStyle = COL.sun; g.lineWidth = 1.5;
       g.setLineDash([4, 4]);
       g.beginPath(); g.moveTo(cx, cy); g.lineTo(sx, sy); g.stroke();
@@ -240,12 +242,16 @@
 
     } else {
       /* 옆에서 — 볼록한 원반 */
-      var halfW = R, halfH = R * 0.10;
+      /* ⚠ 원반 두께는 **일부러 부풀려** 그린다.
+         실제 두께 1000 pc ÷ 지름 30000 pc = 1/30 이라, 그대로 그리면 R*0.033 —
+         몇 픽셀짜리 실선이 되어 '볼록한 중심부'도 '원반'도 보이지 않는다.
+         대신 그림 안에 **부풀렸다는 말과 실제 값**을 적어 둔다(아래 이름표). */
+      var halfW = R, halfH = R * 0.16;
       for (var j = 0; j < 400; j++) {
         var u = (seeded(j) * 2 - 1), v = (seeded(j + 700) * 2 - 1);
         if (u * u + v * v > 1) continue;
         g.fillStyle = "rgba(226,232,240," + (0.2 + seeded(j + 30) * 0.5) + ")";
-        g.beginPath(); g.arc(cx + u * halfW, cy + v * halfH * 2.2, 1.1, 0, Math.PI * 2); g.fill();
+        g.beginPath(); g.arc(cx + u * halfW, cy + v * halfH, 1.1, 0, Math.PI * 2); g.fill();
       }
       /* 볼록한 중심부 */
       var bulge = g.createRadialGradient(cx, cy, 2, cx, cy, R * 0.24);
@@ -255,14 +261,16 @@
       g.beginPath(); g.ellipse(cx, cy, R * 0.24, R * 0.16, 0, 0, Math.PI * 2); g.fill();
       /* 원반 윤곽 */
       g.strokeStyle = "rgba(199,210,254,.5)"; g.lineWidth = 2;
-      g.beginPath(); g.ellipse(cx, cy, halfW, halfH * 1.6, 0, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.ellipse(cx, cy, halfW, halfH, 0, 0, Math.PI * 2); g.stroke();
 
       g.fillStyle = COL.ink; g.font = "bold 14px sans-serif"; g.textAlign = "center";
-      g.fillText("중심부가 볼록한 원반 모양", cx, cy - R * 0.34);
+      g.fillText("중심부가 볼록한 원반 모양", cx, cy - R * 0.40);
+      g.fillStyle = COL.faint; g.font = "12px sans-serif";
+      g.fillText("두께 약 1000 pc — 지름의 30분의 1. 보이도록 두껍게 그렸다", cx, cy - R * 0.40 + 18);
 
       /* 태양계 표시. 이름표는 **원반 아래 가운데**에 둔다 —
          점 옆에 붙이면 태양계가 오른쪽에 있어서 글자가 무대 밖으로 나간다(검증에서 걸렸다). */
-      var sx2 = cx + sunR * 0.95;
+      var sx2 = cx + sunR;
       g.fillStyle = COL.sun;
       g.beginPath(); g.arc(sx2, cy, 6, 0, Math.PI * 2); g.fill();
       g.strokeStyle = "rgba(253,224,71,.6)"; g.lineWidth = 1.5;
@@ -304,12 +312,29 @@
     g.font = "bold 12px sans-serif";
     g.fillText("☀️ 여기", sx, sy + 22);
 
-    /* 시선 — 중심에서 lon 만큼 벗어난 쪽 */
+    /* 시선 — 중심에서 lon 만큼 벗어난 쪽.
+       ⚠ **그려진 길이가 곧 pc 다.** 세로만 0.35 배로 눌러 그리면(예전 코드)
+          같은 pc 라도 옆을 볼 때 훨씬 짧아 보여, 그림이 숫자와 다른 말을 한다.
+          그래서 눌러 그리지 않는다 — 대신 **어느 방향으로도 무대를 넘지 않는
+          하나의 눈금(pxFull)** 을 미리 구해 모든 방향에 똑같이 쓴다. */
     var lonRad = (180 - S.lon) * Math.PI / 180;   // 화면에서 중심 쪽이 왼쪽
     var len = G.pathInDisk(S.lon, S.lat);
     var maxLen = G.MW.sunFromCenterPc + G.MW.diameterPc / 2;
-    var px = (len / maxLen) * (R * 1.9);
-    var ex = sx + Math.cos(lonRad) * px, ey = sy + Math.sin(lonRad) * px * 0.35;
+
+    var pxFull = Infinity;
+    for (var q = 0; q < 360; q += 5) {
+      var frac = G.pathInDisk(q, 0) / maxLen;     // 그 방향에서 가장 긴 경우(lat = 0)
+      if (!(frac > 0)) continue;
+      var qr = (180 - q) * Math.PI / 180;
+      var ux = Math.cos(qr), uy = Math.sin(qr);
+      var roomX = ux < -1e-6 ? (sx - 14) / -ux : (ux > 1e-6 ? (cssW * 0.54 - sx) / ux : Infinity);
+      var roomY = uy < -1e-6 ? (sy - 14) / -uy : (uy > 1e-6 ? (cssH - 30 - sy) / uy : Infinity);
+      pxFull = Math.min(pxFull, roomX / frac, roomY / frac);
+    }
+    if (!isFinite(pxFull) || pxFull < 0) pxFull = R;
+
+    var px = (len / maxLen) * pxFull;
+    var ex = sx + Math.cos(lonRad) * px, ey = sy + Math.sin(lonRad) * px;
     g.strokeStyle = "#38bdf8"; g.lineWidth = 3;
     g.beginPath(); g.moveTo(sx, sy); g.lineTo(ex, ey); g.stroke();
     g.fillStyle = "#38bdf8"; g.font = "bold 13px sans-serif"; g.textAlign = "center";
