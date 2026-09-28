@@ -33,6 +33,9 @@
 
   function $(id) { return document.getElementById(id); }
   function clamp(v, a, b) { return G.clamp(v, a, b); }
+  /* 화면에는 kpc 로 보여 준다(선생님 요청 2026-09-28). 엔진(galaxy.js)은 pc 로 계산한다.
+     23500 pc → "23.5" · 30000 pc → "30" · 866 pc → "0.9" */
+  function kpcNum(pc) { return String(Math.round(pc / 100) / 10); }
 
   /* ---------------------------------------------------------
      1. 미션
@@ -53,15 +56,15 @@
     },
     {
       id: 2, star: "📍", title: "태양계는 어디에?",
-      story: "우리은하의 지름은 약 <b>30000 pc</b>. 태양계는 은하의 <b>어디쯤</b>에 있을까? " +
+      story: "우리은하의 지름은 약 <b>30 kpc</b>. 태양계는 은하의 <b>어디쯤</b>에 있을까? " +
              "위에서 본 모습에서 찾아보자.",
       scene: "shape", setup: { view: "side" }, allow: ["view"],
       predict: { q: "태양계는 우리은하의 어디에 있을까?",
-                 opts: ["정중앙(중심)", "<b>중심에서 8500 pc 떨어진 나선팔</b>", "은하 바깥"], ans: 1 },
+                 opts: ["정중앙(중심)", "<b>중심에서 8.5 kpc 떨어진 나선팔</b>", "은하 바깥"], ans: 1 },
       goals: [{ key: "topView", text: "<b>위에서</b> 본 모습으로 태양계 자리 확인하기" }],
-      why: "태양계는 은하 중심에서 약 <b>8500 pc</b> 떨어진 <b>나선팔</b>에 있습니다. " +
+      why: "태양계는 은하 중심에서 약 <b>8.5 kpc</b> 떨어진 <b>나선팔</b>에 있습니다. " +
            "<b>중심이 아닙니다.</b><br>" +
-           "지름이 30000 pc 이니 반지름은 15000 pc. 태양계는 그 절반이 조금 넘는 곳, " +
+           "지름이 30 kpc 이니 반지름은 15 kpc. 태양계는 그 절반이 조금 넘는 곳, " +
            "<b>변두리 쪽</b>에 있는 셈이에요.<br>" +
            "<em>이 사실이 다음 장면(은하수)의 열쇠가 됩니다 — 우리는 원반 <b>안</b>에 있습니다.</em>"
     },
@@ -88,7 +91,7 @@
                  opts: ["더 밝고 두껍다", "<b>더 어둡고 얇다</b>", "똑같다"], ans: 1 },
       goals: [{ key: "lonBack", text: "중심에서 <b>150° 이상</b> 돌려 보기" }],
       why: "<b>일정하지 않습니다.</b><br>" +
-           "태양계는 은하 <b>중심에서 8500 pc 치우쳐</b> 있습니다. 그래서<br>" +
+           "태양계는 은하 <b>중심에서 8.5 kpc 치우쳐</b> 있습니다. 그래서<br>" +
            "· <b>중심 쪽</b>을 보면 지나는 원반이 길고 별이 빽빽해 <b>밝고 두껍습니다.</b><br>" +
            "· <b>반대쪽(바깥)</b>을 보면 원반이 금방 끝나 <b>어둡고 얇습니다.</b>"
     },
@@ -228,7 +231,7 @@
       g.font = "bold 14px sans-serif"; g.textAlign = "left";
       g.fillText("☀️ 태양계", sx + 10, sy + 5);
       g.fillStyle = COL.faint; g.font = "13px sans-serif";
-      g.fillText("중심에서 8500 pc", sx + 10, sy + 24);
+      g.fillText("중심에서 8.5 kpc", sx + 10, sy + 24);
 
       /* 지름 자 */
       var ry = cy + R + 26;
@@ -238,7 +241,7 @@
         g.beginPath(); g.moveTo(x, ry - 6); g.lineTo(x, ry + 6); g.stroke();
       });
       g.fillStyle = COL.ink; g.font = "bold 14px sans-serif"; g.textAlign = "center";
-      g.fillText("지름 약 30000 pc (약 10만 광년)", cx, ry - 12);
+      g.fillText("지름 약 30 kpc (약 10만 광년)", cx, ry - 12);
 
     } else {
       /* 옆에서 — 볼록한 원반 */
@@ -266,7 +269,7 @@
       g.fillStyle = COL.ink; g.font = "bold 14px sans-serif"; g.textAlign = "center";
       g.fillText("중심부가 볼록한 원반 모양", cx, cy - R * 0.40);
       g.fillStyle = COL.faint; g.font = "12px sans-serif";
-      g.fillText("두께 약 1000 pc — 지름의 30분의 1. 보이도록 두껍게 그렸다", cx, cy - R * 0.40 + 18);
+      g.fillText("두께 약 1 kpc — 지름의 30분의 1. 보이도록 두껍게 그렸다", cx, cy - R * 0.40 + 18);
 
       /* 태양계 표시. 이름표는 **원반 아래 가운데**에 둔다 —
          점 옆에 붙이면 태양계가 오른쪽에 있어서 글자가 무대 밖으로 나간다(검증에서 걸렸다). */
@@ -376,7 +379,7 @@
     g.fillText("밝기 " + Math.round(bright * 100) + " %", vx + vw / 2, vy + vh + 24);
 
     g.fillStyle = COL.faint; g.font = "13px sans-serif"; g.textAlign = "left";
-    g.fillText("시선이 원반을 " + Math.round(len).toLocaleString() + " pc 지난다", 16, 26);
+    g.fillText("시선이 원반을 " + kpcNum(len) + " kpc 지난다", 16, 26);
     g.fillText("길게 지날수록 별이 겹쳐 밝다", 16, 46);
   }
 
@@ -485,15 +488,15 @@
       $("barName2").textContent = "태양계까지";
       $("rowB").classList.remove("hidden");
       setBar("barA", G.MW.diameterPc, G.MW.diameterPc);
-      barText("barA", G.MW.diameterPc.toLocaleString() + " pc");
+      barText("barA", kpcNum(G.MW.diameterPc) + " kpc");
       setBar("barB", G.MW.sunFromCenterPc, G.MW.diameterPc);
-      barText("barB", G.MW.sunFromCenterPc.toLocaleString() + " pc");
-      ro(1, "지름", G.MW.diameterPc.toLocaleString(), " pc");
-      ro(2, "태양계", G.MW.sunFromCenterPc.toLocaleString(), " pc");
+      barText("barB", kpcNum(G.MW.sunFromCenterPc) + " kpc");
+      ro(1, "지름", kpcNum(G.MW.diameterPc), " kpc");
+      ro(2, "태양계", kpcNum(G.MW.sunFromCenterPc), " kpc");
       ro(3, "별 수", "약 " + G.MW.stars, " 억 개");
       ro(4, "종류", G.MW.kind, "");
-      $("fLaw").innerHTML = '지름 <span class="k">30000</span> pc ≒ 약 <span class="t">10만</span> 광년 ' +
-                            '(1 pc = 3.26 광년)';
+      $("fLaw").innerHTML = '지름 <span class="k">30</span> kpc ≒ 약 <span class="t">10만</span> 광년 ' +
+                            '(1 kpc = 1000 pc · 1 pc = 3.26 광년)';
       $("fWhy").innerHTML = S.view === "top"
         ? '<em>위에서 보면 <b>막대</b> 모양 중심부와 <b>나선팔</b></em>'
         : '<em>옆에서 보면 중심부가 볼록한 <b>원반</b> 모양</em>';
@@ -510,13 +513,13 @@
       $("rowB").classList.remove("hidden");
       setBar("barA", bright, 1); barText("barA", Math.round(bright * 100) + " %");
       var maxLen = G.MW.sunFromCenterPc + G.MW.diameterPc / 2;
-      setBar("barB", len, maxLen); barText("barB", Math.round(len).toLocaleString() + " pc");
+      setBar("barB", len, maxLen); barText("barB", kpcNum(len) + " kpc");
       ro(1, "중심에서", S.lon, " °");
       ro(2, "은하면에서", S.lat, " °");
       ro(3, "밝기", Math.round(bright * 100), " %");
-      ro(4, "지나는 거리", Math.round(len).toLocaleString(), " pc");
-      $("fLaw").innerHTML = '시선이 원반 속을 <span class="k">' + Math.round(len).toLocaleString() +
-                            '</span> pc 지난다 → 밝기 <span class="t">' + Math.round(bright * 100) + '</span> %';
+      ro(4, "지나는 거리", kpcNum(len), " kpc");
+      $("fLaw").innerHTML = '시선이 원반 속을 <span class="k">' + kpcNum(len) +
+                            '</span> kpc 지난다 → 밝기 <span class="t">' + Math.round(bright * 100) + '</span> %';
       $("fWhy").innerHTML = (S.lat >= 25)
         ? '<em>은하면에서 많이 벗어났다 → 금방 원반을 벗어나 <b>어둡다</b></em>'
         : (S.lon >= 120
@@ -775,12 +778,12 @@
     var k = sceneKind(), r;
     if (k === "shape") {
       r = { scene: "우리은하", who: S.view === "top" ? "위에서" : "옆에서",
-            a: "지름 " + G.MW.diameterPc.toLocaleString() + " pc",
-            b: "태양계 " + G.MW.sunFromCenterPc.toLocaleString() + " pc" };
+            a: "지름 " + kpcNum(G.MW.diameterPc) + " kpc",
+            b: "태양계 " + kpcNum(G.MW.sunFromCenterPc) + " kpc" };
     } else if (k === "milky") {
       r = { scene: "은하수", who: "중심 " + S.lon + "° · 은하면 " + S.lat + "°",
             a: "밝기 " + Math.round(G.milkyBrightness(S.lon, S.lat) * 100) + " %",
-            b: Math.round(G.pathInDisk(S.lon, S.lat)).toLocaleString() + " pc" };
+            b: kpcNum(G.pathInDisk(S.lon, S.lat)) + " kpc" };
     } else {
       var list = (S.obj === "cluster") ? G.CLUSTERS : G.NEBULAE;
       r = { scene: S.obj === "cluster" ? "성단" : "성운", who: list.map(function (x) { return x.name; }).join(" / "),
