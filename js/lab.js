@@ -47,7 +47,7 @@
              "두 방향을 모두 보고 확인하자.",
       scene: "shape", setup: { view: "top" }, allow: ["view"],
       predict: { q: "우리은하는 어떤 은하로 분류될까?",
-                 opts: ["타원은하", "<b>막대나선은하</b>", "불규칙은하"], ans: 1 },
+                 opts: ["타원은하", "막대나선은하", "불규칙은하"], ans: 1 },
       goals: [{ key: "sideView", text: "<b>옆에서</b> 본 모습 확인하기" }],
       why: "우리은하는 <b>막대나선은하</b>입니다.<br>" +
            "· <b>위에서</b> 보면 <b>막대</b> 모양의 중심부와 <b>나선팔</b>이 있습니다.<br>" +
@@ -60,7 +60,7 @@
              "위에서 본 모습에서 찾아보자.",
       scene: "shape", setup: { view: "side" }, allow: ["view"],
       predict: { q: "태양계는 우리은하의 어디에 있을까?",
-                 opts: ["정중앙(중심)", "<b>중심에서 8.5 kpc 떨어진 나선팔</b>", "은하 바깥"], ans: 1 },
+                 opts: ["정중앙(중심)", "중심에서 8.5 kpc 떨어진 나선팔", "은하 바깥"], ans: 1 },
       goals: [{ key: "topView", text: "<b>위에서</b> 본 모습으로 태양계 자리 확인하기" }],
       why: "태양계는 은하 중심에서 약 <b>8.5 kpc</b> 떨어진 <b>나선팔</b>에 있습니다. " +
            "<b>중심이 아닙니다.</b><br>" +
@@ -74,7 +74,7 @@
              "은하면에서 <b>위아래로</b> 시선을 올려 보며 밝기가 어떻게 변하는지 보자.",
       scene: "milky", setup: { lon: 0, lat: 0 }, allow: ["lon", "lat"],
       predict: { q: "은하면에서 위쪽으로 시선을 올리면 밝기는?",
-                 opts: ["<b>빠르게 어두워진다</b>", "더 밝아진다", "변하지 않는다"], ans: 0 },
+                 opts: ["빠르게 어두워진다", "더 밝아진다", "변하지 않는다"], ans: 0 },
       goals: [{ key: "latUp", text: "은하면에서 <b>30° 이상</b> 위로 올려 보기" }],
       why: "<b>우리가 원반 안에 있기 때문</b>입니다.<br>" +
            "· 원반을 <b>따라</b> 보면 시선이 원반 속을 아주 길게 지나 <b>별이 겹겹이 겹쳐</b> 밝습니다.<br>" +
@@ -88,7 +88,7 @@
              "중심에서 벗어난 각을 <b>180°</b>(정반대쪽)까지 돌려 보자.",
       scene: "milky", setup: { lon: 0, lat: 0 }, allow: ["lon", "lat"],
       predict: { q: "은하 중심 반대쪽을 보면 은하수는?",
-                 opts: ["더 밝고 두껍다", "<b>더 어둡고 얇다</b>", "똑같다"], ans: 1 },
+                 opts: ["더 밝고 두껍다", "더 어둡고 얇다", "똑같다"], ans: 1 },
       goals: [{ key: "lonBack", text: "중심에서 <b>150° 이상</b> 돌려 보기" }],
       why: "<b>일정하지 않습니다.</b><br>" +
            "태양계는 은하 <b>중심에서 8.5 kpc 치우쳐</b> 있습니다. 그래서<br>" +
@@ -101,7 +101,7 @@
              "계절을 바꿔 보며 확인하자.",
       scene: "milky", setup: { lon: 0, lat: 0, season: "summer" }, allow: ["season", "lon"],
       predict: { q: "여름 밤하늘이 향하는 쪽은?",
-                 opts: ["<b>은하 중심 쪽</b>", "은하 바깥쪽", "은하면 위쪽"], ans: 0 },
+                 opts: ["은하 중심 쪽", "은하 바깥쪽", "은하면 위쪽"], ans: 0 },
       goals: [{ key: "winter", text: "<b>겨울</b>로 바꿔 밝기 비교하기" }],
       why: "<b>여름 밤에는 지구의 밤 쪽이 은하 중심을 향하기 때문</b>입니다.<br>" +
            "중심 쪽에는 별이 훨씬 빽빽하니 은하수가 <b>밝고 두껍게</b> 보입니다.<br>" +
@@ -114,7 +114,7 @@
              "성단(산개·구상)과 성운(방출·반사·암흑)을 모두 살펴보자.",
       scene: "cluster", setup: { obj: "cluster" }, allow: ["obj"],
       predict: { q: "<b>구상 성단</b>은 주로 어떤 색 별들로 이루어져 있을까?",
-                 opts: ["푸른색", "<b>붉은색</b>", "흰색"], ans: 1 },
+                 opts: ["푸른색", "붉은색", "흰색"], ans: 1 },
       goals: [{ key: "nebula", text: "<b>성운</b>도 살펴보기" }],
       why: "<b>성단</b> — 많은 별들이 좁은 공간에 모여 있는 천체<br>" +
            "· <b>산개 성단</b> : 수십~수만 개 · 엉성하게 · <b>푸른색</b> · <b>나선팔</b>에<br>" +
@@ -686,7 +686,9 @@
       var opts = $("mOpts"); opts.innerHTML = "";
       M.predict.opts.forEach(function (t, i) {
         var b = document.createElement("button");
-        b.type = "button"; b.className = "opt"; b.innerHTML = t;
+        b.type = "button"; b.className = "opt";
+        /* 예측 보기에는 굵은 글씨를 쓰지 않는다 — 정답만 굵으면 답이 드러난다(2026-09-28). */
+        b.innerHTML = String(t).replace(/<\/?b>/g, "");
         b.addEventListener("click", function () {
           S.predictPick = i; S.missionState = "ready"; renderMissionBody();
         });
